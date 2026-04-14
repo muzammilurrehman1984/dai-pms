@@ -31,6 +31,7 @@ const ALL_TYPES: SubmissionType[] = [
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const userId = user?.id;
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState('');
   const [totalMarks, setTotalMarks]         = useState(0);
@@ -42,17 +43,17 @@ export default function DashboardPage() {
   const [semesterNumber, setSemesterNumber] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     (async () => {
       try {
         setLoading(true);
-        const allocations = await listAllocations({ studentId: user.id });
+        const allocations = await listAllocations({ studentId: userId });
         if (allocations.length === 0) { setLoading(false); return; }
 
         // Derive semester from student's section
         const { data: studentData } = await supabase
           .from('students').select('sections(semester_number)')
-          .eq('id', user.id).maybeSingle();
+          .eq('id', userId).maybeSingle();
         const sectionsJoin = studentData?.sections as { semester_number: number | null } | { semester_number: number | null }[] | null;
         const studentSemNum: number | null = Array.isArray(sectionsJoin)
           ? (sectionsJoin[0]?.semester_number ?? null)
@@ -74,8 +75,8 @@ export default function DashboardPage() {
         const semesterId = targetSem.id;
 
         const [subs, gradesResult] = await Promise.all([
-          listSubmissions(user.id, semesterId),
-          getStudentGrades(user.id, semesterId),
+          listSubmissions(userId, semesterId),
+          getStudentGrades(userId, semesterId),
         ]);
         setSubmissions(subs);
         setTotalMarks(gradesResult.total);
@@ -85,7 +86,7 @@ export default function DashboardPage() {
         const { data: myParticipations } = await supabase
           .from('meeting_participants')
           .select('meeting_id, marks')
-          .eq('student_id', user.id);
+          .eq('student_id', userId);
 
         const myMeetingIds = (myParticipations ?? []).map((r: { meeting_id: string; marks: number }) => r.meeting_id);
         setTotalMeetings(myMeetingIds.length);
@@ -104,7 +105,7 @@ export default function DashboardPage() {
           const { data: semParticipations } = await supabase
             .from('meeting_participants')
             .select('marks, meeting_id')
-            .eq('student_id', user.id)
+            .eq('student_id', userId)
             .in('meeting_id', myMeetingIds);
 
           // Only count marks for meetings in this semester
@@ -124,7 +125,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     })();
-  }, [user]);
+  }, [userId]);
 
   if (loading) return <PageSpinner />;
 
