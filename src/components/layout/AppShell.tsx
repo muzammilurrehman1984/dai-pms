@@ -1,0 +1,23 @@
+import { Sidebar, MobileNav } from './Sidebar';
+import { Footer } from './Footer';
+
+interface AppShellProps {
+  children: React.ReactNode;
+}
+
+export function AppShell({ children }: AppShellProps) {
+  return (
+    <div className="flex h-screen overflow-hidden bg-surface">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <MobileNav />
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 fade-up">
+            {children}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </div>
+  );
+}

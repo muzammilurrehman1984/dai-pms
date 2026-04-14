@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_5db845c42c02760fd9d7bb6268630fc2b9bdda22"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "execute_sql",
+        "apply_migration"
+      ]
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "."
+      ],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
