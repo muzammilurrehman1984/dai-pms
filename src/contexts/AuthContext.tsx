@@ -59,6 +59,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Skip it — we handle profile state manually after changePassword().
       if (event === 'USER_UPDATED') return;
 
+      // INITIAL_SESSION is already handled by getSession().then() above.
+      // Letting it through would call loadProfile twice on startup, creating
+      // duplicate object references that trigger unnecessary re-renders.
+      if (event === 'INITIAL_SESSION') return;
+
+      // TOKEN_REFRESHED fires on every automatic JWT rotation (autoRefreshToken).
+      // The user identity and profile data don't change — calling loadProfile here
+      // produces new object references for `user` and `profile`, which causes every
+      // useAuth() consumer (including DashboardPage's [user] effect) to re-run,
+      // resulting in the continuous dashboard refresh.
+      if (event === 'TOKEN_REFRESHED') return;
+
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
